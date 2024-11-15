@@ -177,3 +177,6 @@ cfslam/wandb
 cfslam/tmp.png
 cfslam/temp.json
 outputs
+
+.vscode/
+concept_graph_venv/

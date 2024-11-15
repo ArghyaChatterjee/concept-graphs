@@ -22,8 +22,8 @@ from pathlib import Path
 
 @dataclass
 class ProgramArgs:
-    datapath = "/home/kuwajerw/new_local_data/new_record3d/ali_apartment/co_store"
-    output_dir = None  # Optional, set dynamically if not provided
+    datapath = "/home/arghya/centerpose_training/scripts/perception-data-logger/convert_svo2_to_other_format/input/Iphone_recording/2024-11-14--13-36-52"
+    output_dir = "/home/arghya/centerpose_training/scripts/perception-data-logger/convert_svo2_to_other_format/output/Iphone_recording/2024-11-14--13-36-52"
 
 desired_width = 1440
 desired_height = 1920
