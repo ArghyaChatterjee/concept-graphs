@@ -129,10 +129,7 @@ def compute_clip_features(image, detections, clip_model, clip_preprocess, clip_t
 
     return image_crops, image_feats, text_feats
 
-<<<<<<< HEAD
-=======
 # @profile
->>>>>>> ali-dev
 def compute_clip_features_batched(image, detections, clip_model, clip_preprocess, clip_tokenizer, classes, device):
     
     image = Image.fromarray(image)
