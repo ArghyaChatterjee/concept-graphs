@@ -18,9 +18,9 @@ pip3 install -r requirements.txt
 pip3 install -e .
 ```
 
-### IPhone Demo Run
+## IPhone Demo Run
 
-## Using an iPhone as your RGB-D sensor
+### Using an iPhone as RGB-D sensor
 
 For this, you'll need to use the Record3D app. The scans you make using the app can be exported to an `.r3d` file. You can then use googledrive or a usb cable or something else to get the `.r3d` file on to your computer. Then right click -> extract out it's contents into a folder, and you'll probably wanna rename the folder to a convenient name. 
 
@@ -31,20 +31,35 @@ python3 preprocess_r3d_file.py`
 ```
 This will convert that initial extracted r3d files into a dataset (RGB, Depth & Pose) that conceptgraphs can use. In the `preprocess_r3d_file.py`, set the datapath variable to your extracted r3d folder. 
 
-## Usage
-
-Start with the `rerun_realtime_mapping.py` script, which runs the detections, builds the scene graph, and vizualizes the results all in one loop.
-
-Change the needed configuration values and run a script with a simple command, for example:
-
-```bash
-# set up your config first as explained below, then
-cd concept-graphs/conceptgraph/slam
-python3 rerun_realtime_mapping.py
+### Data Directory Structure
+```
+concept-graphs
+├── data
+│   └── record3d_scans
+│       └── ihmc_room_scan
+│           ├── conf
+|           |     └── 0.png
+│           |     ├── ...
+│           ├── conf_images
+|           |     └── 0.png
+│           |     ├── ...
+│           ├── dataconfig.yaml
+│           ├── depth
+|           |     └── 0.png
+│           |     ├── ...
+│           ├── high_conf_depth
+|           |     └── 0.png
+│           |     ├── ...
+│           ├── poses
+|           |     └── 0.npy
+│           |     ├── ...
+│           └── rgb
+|           |     └── 0.png
+│           |     ├── ...
 ```
 
-### Setting up your configuration 
-We use the [hydra](https://hydra.cc/) package to manage the configuration, so you don't have to give it a bunch of command line arguments, just edit the  entries in the corresponding `.yaml` file in `./conceptgraph/hydra_configs/` and run the script.
+### Setting up configuration 
+[hydra](https://hydra.cc/) package is used to manage the configuration, so you don't have to give it a bunch of command line arguments, just edit the  entries in the corresponding `.yaml` file in `./conceptgraph/hydra_configs/` and run the script.
 
 For example here is my `./conceptgraph/hydra_configs/rerun_realtime_mapping.yaml` file:
 
@@ -52,7 +67,8 @@ For example here is my `./conceptgraph/hydra_configs/rerun_realtime_mapping.yaml
 defaults:
   - base
   - base_mapping
-  - replica
+  # - replica
+  - record3d
   - sam
   - classes
   - logging_level
@@ -69,17 +85,44 @@ stride: 10
 exp_suffix: r_mapping_stride_10_run2 # just a convenient name for the mapping run
 ```
 
-First the values are loaded from `base.yaml`, then `base_mapping.yaml` then `replica.yaml` and so on. If there is a conflict (i.e. two files are modifying the same config parameter), the values from the earlier file are overwritten. i.e. `replica.yaml` will overwrite any confliting values in `base.yaml` and so on.
+First the values are loaded from `base.yaml`, then `base_mapping.yaml` (internally loads `base_paths.yaml`) then `record3d.yaml`, then `sam.yaml`, then `classes.yaml` and then, `logging_level.yaml` and `__self__` is the file itself. If there is a conflict (i.e. two files are modifying the same config parameter), the values from the earlier file are overwritten. i.e. `record3d.yaml` will overwrite any confliting values in `base.yaml` and so on.
 
 Finally `_self_` is loaded, which are te values in `rerun_realtime_mapping.yaml` itself. This is where you can put your own custom values. Also feel free to add your own `.yaml` files to `./conceptgraph/hydra_configs/` and they will be loaded in the same way.
 
+`force_detection: !!bool False`: The force_detection flag is used to determine whether the object detection process should be explicitly re-run, regardless of whether previous detection results already exist. It essentially overrides the logic that skips detection if results are available, ensuring that the detection process is performed again.
+
+`save_detections: !!bool True`: The save_detections flag controls whether the detection results should be saved to disk after they are computed during the object detection process. This flag ensures that the outputs of detection, such as bounding boxes, masks, and associated metadata, are stored for later use, visualization, or debugging.
+
 #### Paths
-
-The first thing to set in your config files is where you've installed conceptgraphs and where your data is. Update this in the `./conceptgraph/hydra_configs/base_paaths.yaml` file. For me, it is:
-
+Update this in the `./conceptgraph/hydra_configs/base.yaml` file. For me, it is:
 ```yaml
-repo_root: /home/arghya/repos/concept-graphs
-data_root: /home/arghya/local_data
+defaults:
+  - override hydra/job_logging: custom_logging_format
+
+use_wandb: !!bool False
+use_rerun: !!bool False
+```
+Update this in the `./conceptgraph/hydra_configs/base_paths.yaml` file. For me, it is:
+```yaml
+repo_root: /home/arghya/concept-graphs
+data_root: /home/arghya/concept-graphs/data
+```
+Update this in the `./conceptgraph/hydra_configs/record3d.yaml` file. For me, it is:
+```yaml
+defaults:
+  - base_paths
+  
+dataset_root: ${data_root}/record3d_scans
+scene_id: ihmc_room_scan
+dataset_config: ${dataset_root}/${scene_id}/dataconfig.yaml
+render_camera_path: ${repo_root}/conceptgraph/dataset/dataconfigs/record3d/record_3d_camera.json
+```
+Update this in the `./conceptgraph/hydra_configs/sam.yaml` file. For me, it is:
+```yaml
+sam_variant: sam # sam
+sam_encoder_version: "vit_l"
+sam_checkpoint_path: /home/arghya/concept-graphs/conceptgraph/slam/sam_l.pt
+mobile_sam_path: /home/arghya/concept-graphs/conceptgraph/slam/mobile_sam.pt
 ```
 
 ### Building the map
@@ -93,6 +136,7 @@ python3 rerun_realtime_mapping.py
 
 Note that if you don't have the models installed, it should just automatically download them for you.
 
+### Save Mapping and Detection Results
 The results are saved in the corresponding dataset directory, in a folder called `exps`. It will name the folder with the `exp_suffix` you set in the configuration file, and also save a `config_params.json` file in that folder with the configuration parameters used for the run.
 
 **NOTE:** For convinience, the script will also automatically create a symlink `/concept-graphs/latest_pcd_save` -> `Replica/room0/exps/r_mapping_stride_10_run2/pcd_r_mapping_stride_10_run2.pkl.gz` so you can easily access the latest results by using the `latest_pcd_save` path in your argument to the visualization script.
