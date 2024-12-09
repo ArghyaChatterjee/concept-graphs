@@ -15,7 +15,7 @@ from PIL import Image
 import torch
 import torch.nn.functional as F
 import open_clip
-from gradslam.structures.pointclouds import Pointclouds
+from conceptgraph.utils.pointclouds import Pointclouds
 
 from conceptgraph.slam.slam_classes import MapObjectList
 
@@ -140,8 +140,8 @@ if __name__ == "__main__":
         crop_features = []
         for i, idx_det in enumerate(idx_sort[:5]):
             # wrong_path = picked_obj['color_path'][idx_det]
-            # correct_prefix = '/home/sacha/data/scan12/'
-            # wrong_prefix = '/home/kuwajerw/local_data/azure/liam_lab_w_objects/scan12/'
+            # correct_prefix = '/home/arghya/concept-graphs/data/scan12/'
+            # wrong_prefix = '/home/arghya/concept-graphs/data/azure/liam_lab_w_objects/scan12/'
             # correct_path = wrong_path.replace(wrong_prefix, correct_prefix)
 
             # image = Image.open(correct_path)
