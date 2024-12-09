@@ -180,3 +180,7 @@ outputs
 
 .vscode/
 concept_graph_venv/
+data/
+conceptgraph/slam/mobile_sam.pt
+conceptgraph/slam/sam_l.pt
+conceptgraph/slam/yolov8l-world.pt

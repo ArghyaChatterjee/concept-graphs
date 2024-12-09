@@ -202,7 +202,7 @@ def vis_result_fast_on_depth(
     depth_image: np.ndarray, 
     detections: sv.Detections, 
     classes: list[str], 
-    color: Color | ColorPalette = ColorPalette.default(), 
+    color: Color | ColorPalette = ColorPalette.DEFAULT, 
     instance_random_color: bool = False,
     draw_bbox: bool = True,
 ) -> np.ndarray:
@@ -210,6 +210,18 @@ def vis_result_fast_on_depth(
     Annotate the image with the detection results. 
     This is fast but of the same resolution of the input image, thus can be blurry. 
     '''
+    # box_annotator = sv.BoundingBoxAnnotator(
+    #     color = color,
+    # )
+    # label_annontator = sv.LabelAnnotator(
+    #     text_scale=0.3,
+    #     text_thickness=1,
+    #     text_padding=2,
+    # )
+    # mask_annotator = sv.MaskAnnotator(
+    #     color = color,
+    #     opacity=0.35,
+    # )
     # annotate image with detections
     box_annotator = sv.BoxAnnotator(
         color = color,
@@ -462,7 +474,7 @@ def vis_result_for_vlm(
     image: np.ndarray, 
     detections: sv.Detections, 
     labels: list[str], 
-    color: Color | ColorPalette = ColorPalette.default(), 
+    color: Color | ColorPalette = ColorPalette.DEFAULT, 
     draw_bbox: bool = True,
     thickness: int = 2,
     text_scale: float = 0.3,
@@ -497,7 +509,7 @@ def vis_result_fast(
     image: np.ndarray, 
     detections: sv.Detections, 
     classes: list[str], 
-    color: Color | ColorPalette = ColorPalette.default(), 
+    color: Color | ColorPalette = ColorPalette.DEFAULT, 
     instance_random_color: bool = False,
     draw_bbox: bool = True,
 ) -> np.ndarray:

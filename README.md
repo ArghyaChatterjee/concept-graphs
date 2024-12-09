@@ -4,17 +4,18 @@
 This repository contains the code for the ConceptGraphs project. ConceptGraphs builds open-vocabulary 3D scenegraphs that enable a broad range of perception and task planning capabilities.
 
 ## Requirements
-This was done on Ubuntu 20.04 with cuda 12.1 and python 3.8.
+This was done on Ubuntu 20.04 with cuda 12.1 and python 3.10.
 
 ## Setup
-Navigate to pose_labeler repo and create a virtual environment.
+Navigate to concept-graphs repo and create a virtual environment.
 ```bash
 git clone https://github.com/ArghyaChatterjee/concept-graphs.git
 cd concept-graphs
-python3 -m venv concept_graph_venv
+python3.10 -m venv concept_graph_venv
 source concept_graph_venv/bin/activate
 pip3 install --upgrade pip
 pip3 install -r requirements.txt
+pip3 install -e .
 ```
 
 ### IPhone Demo Run
