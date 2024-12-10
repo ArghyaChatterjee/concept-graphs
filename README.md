@@ -93,6 +93,8 @@ Finally `_self_` is loaded, which are te values in `rerun_realtime_mapping.yaml`
 
 `save_detections: !!bool True`: The save_detections flag controls whether the detection results should be saved to disk after they are computed during the object detection process. This flag ensures that the outputs of detection, such as bounding boxes, masks, and associated metadata, are stored for later use, visualization, or debugging.
 
+`stride: 10`: The detection will initiate after every 10 frames.
+
 #### Paths
 Update this in the `./conceptgraph/hydra_configs/base.yaml` file. For me, it is:
 ```yaml

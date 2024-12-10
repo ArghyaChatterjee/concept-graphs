@@ -210,21 +210,11 @@ def vis_result_fast_on_depth(
     Annotate the image with the detection results. 
     This is fast but of the same resolution of the input image, thus can be blurry. 
     '''
-    # box_annotator = sv.BoundingBoxAnnotator(
-    #     color = color,
-    # )
-    # label_annontator = sv.LabelAnnotator(
-    #     text_scale=0.3,
-    #     text_thickness=1,
-    #     text_padding=2,
-    # )
-    # mask_annotator = sv.MaskAnnotator(
-    #     color = color,
-    #     opacity=0.35,
-    # )
     # annotate image with detections
-    box_annotator = sv.BoxAnnotator(
+    box_annotator = sv.BoundingBoxAnnotator(
         color = color,
+    )
+    label_annotator = sv.LabelAnnotator(
         text_scale=0.3,
         text_thickness=1,
         text_padding=2,
@@ -257,7 +247,7 @@ def vis_result_fast_on_depth(
     annotated_image = mask_annotator.annotate(scene=depth_image.copy(), detections=detections)
     
     if draw_bbox:
-        annotated_image = box_annotator.annotate(scene=annotated_image, detections=detections, labels=labels)
+        annotated_image = label_annotator.annotate(scene=annotated_image, detections=detections, labels=labels)
     return annotated_image, labels
 
 
@@ -518,8 +508,10 @@ def vis_result_fast(
     This is fast but of the same resolution of the input image, thus can be blurry. 
     '''
     # annotate image with detections
-    box_annotator = sv.BoxAnnotator(
+    box_annotator = sv.BoundingBoxAnnotator(
         color = color,
+    )
+    label_annotator = sv.LabelAnnotator(
         text_scale=0.3,
         text_thickness=1,
         text_padding=2,
@@ -551,7 +543,7 @@ def vis_result_fast(
     annotated_image = mask_annotator.annotate(scene=image.copy(), detections=detections)
     
     if draw_bbox:
-        annotated_image = box_annotator.annotate(scene=annotated_image, detections=detections, labels=labels)
+        annotated_image = label_annotator.annotate(scene=annotated_image, detections=detections, labels=labels)
     return annotated_image, labels
 
 def vis_result_slow_caption(image, masks, boxes_filt, pred_phrases, caption, text_prompt):
