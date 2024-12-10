@@ -4,7 +4,7 @@
 This repository contains the code for the ConceptGraphs project. ConceptGraphs builds open-vocabulary 3D scenegraphs that enable a broad range of perception and task planning capabilities.
 
 ## Requirements
-This was done on Ubuntu 20.04 with cuda 12.1 and python 3.10.
+This was done on Ubuntu 22.04 with cuda 12.1 and python 3.10.
 
 ## Setup
 Navigate to concept-graphs repo and create a virtual environment.
@@ -29,7 +29,7 @@ Run the script:
 cd concept-graphs/conceptgraph/dataset/
 python3 preprocess_r3d_file.py` 
 ```
-This will convert that initial extracted r3d files into a dataset (RGB, Depth & Pose) that conceptgraphs can use. In the `preprocess_r3d_file.py`, set the datapath variable to your extracted r3d folder. 
+This will convert that initial extracted r3d files into a dataset (RGB, Depth & Pose) that conceptgraphs can use. In the `preprocess_r3d_file.py`, set the datapath variable to your extracted r3d folder. For me, I renamed it to `ihmc_room_scan`.
 
 ### Data Directory Structure
 ```
@@ -67,7 +67,6 @@ For example here is my `./conceptgraph/hydra_configs/rerun_realtime_mapping.yaml
 defaults:
   - base
   - base_mapping
-  # - replica
   - record3d
   - sam
   - classes
@@ -141,42 +140,7 @@ Note that if you don't have the models installed, it should just automatically d
 ### Save Mapping and Detection Results
 The results are saved in the corresponding dataset directory, in a folder called `exps`. It will name the folder with the `exp_suffix` you set in the configuration file, and also save a `config_params.json` file in that folder with the configuration parameters used for the run.
 
-**NOTE:** For convinience, the script will also automatically create a symlink `/concept-graphs/latest_pcd_save` -> `Replica/room0/exps/r_mapping_stride_10_run2/pcd_r_mapping_stride_10_run2.pkl.gz` so you can easily access the latest results by using the `latest_pcd_save` path in your argument to the visualization script.
-
-Here is what the ouput of running the mapping script looks like for `room0` in the `Replica` dataset:
-
-```bash
-.
-./Replica # This is the dataset root
-./Replica/room0 # This is the scene_id
-./Replica/room0/exps # This parent folder of all the results from conceptgraphs
-
-# This is the folder for the run's detections, named according to the exp_suffix
-./Replica/room0/exps/s_detections_stride_10_run2 
-
-# This is where the visualizations are saved, they are images with bounding boxes and masks overlayed
-./Replica/room0/exps/s_detections_stride_10_run2/vis 
-
-# This is where the detection results are saved, they are in the form of pkl.gz files 
-# that contain a dictionary of the detection results
-./Replica/room0/exps/s_detections_stride_10_run2/detections 
-
-# This is the mapping output folder for the specific run, named according to the exp_suffix
-./Replica/room0/exps/r_mapping_stride_10_run2/
-# This is the saved configuration file for the run
-./Replica/room0/exps/r_mapping_stride_10_run2/config_params.json
-# We also save the configuration file of the detection run which was used 
-./Replica/room0/exps/r_mapping_stride_10_run2/config_params_detections.json
-# The mapping results are saved in a pkl.gz file
-./Replica/room0/exps/r_mapping_stride_10_run2/pcd_r_mapping_stride_10_run2.pkl.gz
-# The video of the mapping process is saved in a mp4 file
-./Replica/room0/exps/r_mapping_stride_10_run2/s_mapping_r_mapping_stride_10_run2.mp4
-# If you set save_objects_all_frames=True, then the object mapping results are saved in a folder
-./Replica/room0/exps/r_mapping_stride_10_run2//saved_obj_all_frames
-# In the saved_obj_all_frames folder, there is a folder for each detection run used, and in each of those folders there is a pkl.gz file for each object mapping result
-./Replica/room0/exps/r_mapping_stride_10_run2/saved_obj_all_frames/det_exp_s_detections_stride_10_run2
-
-```
+**NOTE:** For convinience, the script will also automatically create a symlink `~/concept-graphs/latest_pcd_save` -> `~/concept-graphs//home/arghya/concept-graphs/data/record3d_scans/ihmc_room_scan/exps/r_mapping_stride10/pcd_r_mapping_stride_10_run2.pkl.gz` so you can easily access the latest results by using the `latest_pcd_save` path in your argument to the visualization script.
 
 ## Running the visualization script
 
