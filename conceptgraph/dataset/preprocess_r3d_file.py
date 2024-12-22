@@ -22,8 +22,8 @@ from pathlib import Path
 
 @dataclass
 class ProgramArgs:
-    datapath = "/home/arghya/centerpose_training/scripts/perception-data-logger/convert_svo2_to_other_format/input/Iphone_recording/2024-11-14--13-36-52"
-    output_dir = "/home/arghya/centerpose_training/scripts/perception-data-logger/convert_svo2_to_other_format/output/Iphone_recording/2024-11-14--13-36-52"
+    datapath = "/home/arghya/Documents/ZED/Iphone_Concept_Graph_Recordings/isr_lab_room_scan_2024-12-20--12-22-25"
+    output_dir = "/home/arghya/concept-graphs/data/record3d_scans/isr_lab_room_scan_2024-12-20--12-22-25"
 
 desired_width = 1440
 desired_height = 1920

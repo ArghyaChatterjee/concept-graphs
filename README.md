@@ -113,7 +113,7 @@ defaults:
   - base_paths
   
 dataset_root: ${data_root}/record3d_scans
-scene_id: ihmc_room_scan
+scene_id: isr_lab_room_scan_2024-12-20--12-22-25
 dataset_config: ${dataset_root}/${scene_id}/dataconfig.yaml
 render_camera_path: ${repo_root}/conceptgraph/dataset/dataconfigs/record3d/record_3d_camera.json
 ```
