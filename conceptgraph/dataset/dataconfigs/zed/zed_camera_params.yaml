@@ -1,0 +1,9 @@
+camera_params:
+  cx: 954.3453979492188
+  cy: 531.0470581054688
+  fx: 1388.0531005859375
+  fy: 1388.0531005859375
+  image_height: 1080
+  image_width: 1920
+  png_depth_scale: 1000.0
+dataset_name: zed

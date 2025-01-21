@@ -1,0 +1,7 @@
+defaults:
+  - base_paths
+  
+dataset_root: ${data_root}/zed_scans
+scene_id: 20250115_ZED_Mini_Recording_ISR_lab_computer_room_exploration_res_1920x1080
+dataset_config: ${dataset_root}/${scene_id}/zed_camera_params.yaml
+render_camera_path: ${repo_root}/conceptgraph/dataset/dataconfigs/zed/zed_camera_params.json

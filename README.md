@@ -157,8 +157,10 @@ or if you'd like to point it to a specific result, you can just point it to the 
 ```bash
 cd concept-graphs/scripts/
 python3 visualize_cfslam_results.py \
-    --result_path /path/to/data/Replica/room0/exps/r_mapping_stride_10_run2/pcd_r_mapping_stride_10_run2.pkl.gz
+    --result_path /home/arghya/concept-graphs/data/record3d_scans/ihmc_room_scan/exps/r_mapping_stride10/latest_pcd_save
 ```
+
+"cfslam" likely refers to "Concept Fusion SLAM" where concept fusion indicates the integration or "fusion" of concepts or semantic information into the SLAM process. In this context, concepts refer to higher-level semantic representations, such as object classes, relationships, or contextual data about the environment.
 
 ## Searching the map with text
 
@@ -179,24 +181,152 @@ And then we can type `cabinet` and press enter, and the point cloud will be colo
 
 ![CabinetSearch](./assets/cg_cabinet_search.jpeg)
 
+## ZED Demo
+### Using a ZED camera as RGB-D sensor
 
-## Streaming the map directly from an iPhone as you're doing the scan
+For this tutorial, you'll be downloading the data from zed camera. The google drive link is [here]() to download the data. The data is kept as `rgb`, `depth`, `poses` folder and `zed_camera_params.yaml` file. Download and extract the data from the zip file and keep the folder inside the `data` folder in the following way:
 
-If you'd like to skip the dataset making process and build the map in near real time as you're recording the scan, you can use the `concept-graphs/conceptgraph/slam/r3d_stream_rerun_realtime_mapping.py` script for that, it's also covered in the getting started video. First you need to setup the record3D git repo, which requires installing cmake. After that, simply use the [USB streaming option](https://record3d.app/features) in the Record3D app, and then run the `r3d_stream_rerun_realtime_mapping.py` script to start building the map immediately. So that's:
+### Data Directory Structure
 ```
-sudo apt install cmake
+concept-graphs
+└── data
+     └── zed_scans
+         └── 20250115_ZED_Mini_Recording_ISR_lab_computer_room_exploration_res_1920x1080
+               ├── zed_camera_params.yaml
+               ├── depth
+               |     ├──  0.png
+               |     └── ...
+               ├── poses
+               |     ├──  0.npy
+               |     └── ...
+               └── rgb
+                     ├──  0.jpg
+                     └── ...
 ```
-and then, with your `conceptgraph` conda environment active, run these commands from the record3D github [README file](https://github.com/marek-simonik/record3d?tab=readme-ov-file#python)
+
+### Setting up configuration 
+[hydra](https://hydra.cc/) package is used to manage the configuration, so you don't have to give it a bunch of command line arguments, just edit the  entries in the corresponding `.yaml` file in `./conceptgraph/hydra_configs/` and run the script.
+
+For example here is my `./conceptgraph/hydra_configs/rerun_realtime_mapping.yaml` file:
+
+```yaml
+defaults:
+  - base
+  - base_mapping
+  - zed
+  - sam
+  - classes
+  - logging_level
+  - _self_
+
+detections_exp_suffix: s_detections_stride_10_run2 # just a convenient name for the detection run
+force_detection: !!bool False
+save_detections: !!bool True
+
+use_rerun: !!bool True
+save_rerun: !!bool True
+
+stride: 10
+exp_suffix: r_mapping_stride_10_run2 # just a convenient name for the mapping run
 ```
-git clone https://github.com/marek-simonik/record3d
-cd record3d
-python setup.py install
+
+First the values are loaded from `base.yaml`, then `base_mapping.yaml` (internally loads `base_paths.yaml`) then `zed.yaml`, then `sam.yaml`, then `classes.yaml` and then, `logging_level.yaml` and `__self__` is the file itself. If there is a conflict (i.e. two files are modifying the same config parameter), the values from the earlier file are overwritten. i.e. `record3d.yaml` will overwrite any confliting values in `base.yaml` and so on.
+
+Finally `_self_` is loaded, which are te values in `rerun_realtime_mapping.yaml` itself. This is where you can put your own custom values. Also feel free to add your own `.yaml` files to `./conceptgraph/hydra_configs/` and they will be loaded in the same way.
+
+`force_detection: !!bool False`: The force_detection flag is used to determine whether the object detection process should be explicitly re-run, regardless of whether previous detection results already exist. It essentially overrides the logic that skips detection if results are available, ensuring that the detection process is performed again.
+
+`save_detections: !!bool True`: The save_detections flag controls whether the detection results should be saved to disk after they are computed during the object detection process. This flag ensures that the outputs of detection, such as bounding boxes, masks, and associated metadata, are stored for later use, visualization, or debugging.
+
+`stride: 10`: The detection will initiate after every 10 frames.
+
+#### Paths
+Update this in the `./conceptgraph/hydra_configs/base.yaml` file. For me, it is:
+```yaml
+defaults:
+  - override hydra/job_logging: custom_logging_format
+
+use_wandb: !!bool False
+use_rerun: !!bool False
 ```
-and now you can run the `r3d_stream_rerun_realtime_mapping.py` same as the previous scripts. Of course, you will have to have the iPhone streaming via USB to your computer at the same time when you run the script.
+Update this in the `./conceptgraph/hydra_configs/base_paths.yaml` file. For me, it is:
+```yaml
+repo_root: /home/arghya/concept-graphs
+data_root: /home/arghya/concept-graphs/data
+```
+Update this in the `./conceptgraph/hydra_configs/zed.yaml` file. For me, it is:
+```yaml
+defaults:
+  - base_paths
+  
+dataset_root: ${data_root}/zed_scans
+scene_id: isr_lab_room_scan_2024-12-20--12-22-25
+dataset_config: ${dataset_root}/${scene_id}/zed_camera_params.yaml
+render_camera_path: ${repo_root}/conceptgraph/dataset/dataconfigs/zed/zed_camera_params.json
+```
+Update this in the `./conceptgraph/hydra_configs/sam.yaml` file. For me, it is:
+```yaml
+sam_variant: sam # sam
+sam_encoder_version: "vit_l"
+sam_checkpoint_path: /home/arghya/concept-graphs/conceptgraph/slam/sam_l.pt
+mobile_sam_path: /home/arghya/concept-graphs/conceptgraph/slam/mobile_sam.pt
+```
+
+### Building the map
+
+To build the map, simply run the following command from the `conceptgraph` directory:
+
 ```bash
-cd /path/to/code/concept-graphs/conceptgraph/
-python /slam/r3d_stream_rerun_realtime_mapping.py
+cd concept-graphs/conceptgraph/slam
+python3 rerun_realtime_mapping.py
 ```
+
+Note that if you don't have the models installed, it should just automatically download them for you.
+
+### Save Mapping and Detection Results
+The results are saved in the corresponding dataset directory, in a folder called `exps`. It will name the folder with the `exp_suffix` you set in the configuration file, and also save a `config_params.json` file in that folder with the configuration parameters used for the run.
+
+**NOTE:** For convinience, the script will also automatically create a symlink `~/concept-graphs/latest_pcd_save` -> `~/concept-graphs//home/arghya/concept-graphs/data/record3d_scans/ihmc_room_scan/exps/r_mapping_stride10/pcd_r_mapping_stride_10_run2.pkl.gz` so you can easily access the latest results by using the `latest_pcd_save` path in your argument to the visualization script.
+
+## Running the visualization script
+
+This script allows you to vizluatize the map in 3D and query the map objects with text. The `latest_pcd_save` symlink is used to point to the latest mapping results, but you can also point it to any other mapping results you want to visualize.
+
+```bash
+cd concept-graphs/scripts/
+python3 visualize_cfslam_results.py \
+    --result_path latest_pcd_save 
+```
+
+or if you'd like to point it to a specific result, you can just point it to the pkl.gz file directly:
+
+```bash
+cd concept-graphs/scripts/
+python3 visualize_cfslam_results.py \
+    --result_path /home/arghya/concept-graphs/data/record3d_scans/ihmc_room_scan/exps/r_mapping_stride10/latest_pcd_save
+```
+
+"cfslam" likely refers to "Concept Fusion SLAM" where concept fusion indicates the integration or "fusion" of concepts or semantic information into the SLAM process. In this context, concepts refer to higher-level semantic representations, such as object classes, relationships, or contextual data about the environment.
+
+## Searching the map with text
+
+Then in the open3d visualizer window, you can use the following key callbacks to change the visualization. 
+* Press `b` to toggle the background point clouds (wall, floor, ceiling, etc.). Only works on the ConceptGraphs-Detect.
+* Press `c` to color the point clouds by the object class from the tagging model. Only works on the ConceptGraphs-Detect.
+* Press `r` to color the point clouds by RGB. 
+* Press `f` and type text in the terminal, and the point cloud will be colored by the CLIP similarity with the input text. 
+* Press `i` to color the point clouds by object instance ID. 
+
+Here is what it looks like to search for "cabinet" in the Replica `room0` scene.
+
+First we run the script, and then press `f` to trigger the `Enter your query:` input 
+
+![CabinetPreSearch](./assets/cg_cabinet_pre_search.jpeg)
+
+And then we can type `cabinet` and press enter, and the point cloud will be colored by the CLIP similarity with the input text.
+
+![CabinetSearch](./assets/cg_cabinet_search.jpeg)
+
 
 ## Debugging
 
